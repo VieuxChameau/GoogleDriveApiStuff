@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width">
+        <script src="https://apis.google.com/js/api.js?onload=onApiLoad"></script>
+        <script>
+            var clientId = 'someClientId.apps.googleusercontent.com';
+            var developerKey = 'aDevelopperKey';
+            var accessToken;
+
+            function onApiLoad() {
+                // This load the auth and picker libraries
+                gapi.load('auth', authenticateWithGoogle);
+                gapi.load('picker');
+            }
+
+            function authenticateWithGoogle() {
+                window.gapi.auth.authorize({
+                    'client_id': clientId,
+                    'scope': ['https://www.googleapis.com/auth/drive']
+                }, handleAuthentication);
+            }
+
+            function handleAuthentication(result) {
+                if (result && !result.error) {
+                    accessToken = result.access_token;
+                    setupPicker();
+                }
+            }
+
+            function setupPicker() {
+                var picker = new google.picker.PickerBuilder()
+                        .addView(new google.picker.DocsUploadView()) // The upload view
+                        .addView(new google.picker.DocsView()) // Allow the user to use of picture of his own drive
+                        .setOAuthToken(accessToken)
+                        .setDeveloperKey(developerKey)
+                        .setCallback(myCallback)
+                        .enableFeature(google.picker.Feature.MULTISELECT_ENABLED) // https://developers.google.com/picker/docs/reference#Feature
+                        .enableFeature(google.picker.Feature.NAV_HIDDEN)
+                        .build();
+                picker.setVisible(true);
+            }
+
+            function myCallback(data) {
+                if (data.action == google.picker.Action.PICKED) {
+                    alert(data.docs[0].name);
+                } else if (data.action == google.picker.Action.CANCEL) {
+                    alert('goodbye');
+                }
+            }
+        </script>
+    </head>
+    <body>
+        <div>TODO write content</div>
+    </body>
+</html>
